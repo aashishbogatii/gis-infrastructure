@@ -1,0 +1,300 @@
+# Source registry — the machine-readable STTM
+# One row per source found under D:\raw. The runner iterates this.
+#
+# Fields:
+#   schema        target schema (see NOTE on mappings below)
+#   table         target table == source_key by convention
+#   raw_root      path under RAW_BASE down to (not including) the <as_of> dir
+#   source_name   human citation
+#   source_url    canonical landing / agency page  (from GIS catalogue)
+#   pattern       A=polygon containment | B=distance decay | C=compound
+#   refresh       update cadence
+#
+
+sources:
+
+  # California / natural_hazard
+  flood_fema_nfhl:
+    schema: natural_hazard
+    table: flood_fema_nfhl
+    raw_root: California/natural_hazard/flood_fema_nfhl
+    source_name: FEMA National Flood Hazard Layer
+    source_url: https://msc.fema.gov/portal/advanceSearch
+    pattern: A
+
+  flood_dwm_dam_breach_inundation:
+    schema: natural_hazard
+    table: flood_dwm_dam_breach_inundation
+    raw_root: California/natural_hazard/flood_dwm_dam_breach_inundation
+    source_name: CA DWR/DSOD Dam Breach Inundation Boundaries
+    source_url: https://fmds.water.ca.gov/maps/   # catalogue gives no direct URL
+    pattern: A
+
+  flood_noaa_slrv:
+    schema: natural_hazard
+    table: flood_noaa_slrv
+    raw_root: California/natural_hazard/flood_noaa_slrv
+    source_name: NOAA Sea Level Rise Viewer (CA, 7 regional files)
+    source_url: https://coast.noaa.gov/slrdata/   # multiple files, no single direct link
+    pattern: A
+
+  seismic_cgs_fault_zones:
+    schema: natural_hazard
+    table: seismic_cgs_fault_zones
+    raw_root: California/natural_hazard/seismic_cgs_fault_zones
+    source_name: CGS Alquist-Priolo Earthquake Fault Zones
+    source_url: https://gis-cnra.hub.arcgis.com/   # CNRA GIS Open Data
+    pattern: A
+
+  seismic_cgs_liquefaction_zones:
+    schema: natural_hazard
+    table: seismic_cgs_liquefaction_zones
+    raw_root: California/natural_hazard/seismic_cgs_liquefaction_zones
+    source_name: CGS Seismic Hazards Program — Liquefaction Zones
+    source_url: https://www.conservation.ca.gov/cgs/geohazards/seismic-hazards-zonation
+    pattern: A
+
+  seismic_cgs_landslide_zones:
+    schema: natural_hazard
+    table: seismic_cgs_landslide_zones
+    raw_root: California/natural_hazard/seismic_cgs_landslide_zones
+    source_name: CGS Seismic Hazards Program — Landslide Zones
+    source_url: https://gis-cnra.hub.arcgis.com/datasets/cadoc::cgs-seismic-hazards-program-landslide-zones
+    pattern: A
+
+  tsunami_cgs_hazard_area:
+    schema: natural_hazard
+    table: tsunami_cgs_hazard_area
+    raw_root: California/natural_hazard/tsunami_cgs_hazard_area
+    source_name: CGS Tsunami Hazard Area for Emergency Planning
+    source_url: https://www.conservation.ca.gov/cgs/tsunami/maps
+    pattern: A
+
+  wildfire_calfire_fhsz:
+    schema: natural_hazard
+    table: wildfire_calfire_fhsz
+    raw_root: California/natural_hazard/wildfire_calfire_fhsz
+    source_name: CAL FIRE Fire Hazard Severity Zones (LRA 2025 + SRA 2024)
+    source_url: https://osfm.fire.ca.gov/what-we-do/community-wildfire-preparedness-and-mitigation/fire-hazard-severity-zones
+    pattern: A
+
+  wildfire_calfire_wui:
+    schema: natural_hazard
+    table: wildfire_calfire_wui
+    raw_root: California/natural_hazard/wildfire_calfire_wui
+    source_name: CAL FIRE Wildland-Urban Interface
+    source_url: https://gis-cnra.hub.arcgis.com/   # CNRA GIS Open Data
+    pattern: A
+
+  # ---- California / contamination  (-> environmental) ----------------------
+  env_swrcb_geotracker:
+    schema: environmental
+    table: env_swrcb_geotracker
+    raw_root: California/contamination/env_swrcb_geotracker
+    source_name: SWRCB GeoTracker cleanup/LUST sites (CA)
+    source_url: https://data.ca.gov/dataset/ground-water-water-quality-regulatory-information
+    pattern: B
+    refresh: quarterly
+
+  water_swrcb_gama:
+    schema: environmental
+    table: water_swrcb_gama
+    raw_root: California/contamination/water_swrcb_gama
+    source_name: SWRCB GAMA groundwater quality (CA)
+    source_url: https://data.ca.gov/dataset/ground-water-water-quality-results
+    pattern: B
+    refresh: quarterly
+
+  # ---- California / climate  (NOT in catalogue; URLs unchanged) ------------
+  energy_cec_coolingcost:
+    schema: climate
+    table: energy_cec_coolingcost
+    raw_root: California/climate/energy_cec_coolingcost
+    source_name: CEC cooling cost (CA)
+    source_url: https://www.energy.ca.gov/
+    pattern: C
+    refresh: annual
+
+  heat_cec_extreme_heat:
+    schema: climate
+    table: heat_cec_extreme_heat
+    raw_root: California/climate/heat_cec_extreme_heat
+    source_name: CEC extreme heat days (CA)
+    source_url: https://www.energy.ca.gov/
+    pattern: C
+    refresh: annual
+
+  # ---- California / mining  (-> environmental?) ----------------------------
+  dmr_allmine:
+    schema: environmental
+    table: dmr_allmine
+    raw_root: California/mining/dmr_allmine
+    source_name: CA DOC DMR All Mines
+    source_url: https://www.conservation.ca.gov/dmr
+    pattern: B
+    refresh: daily
+
+  # ---- USA / contamination  (-> environmental) -----------------------------
+  env_epa_superfund_npl:
+    schema: environmental
+    table: env_epa_superfund_npl
+    raw_root: USA/contamination/env_epa_superfund_npl
+    source_name: EPA Superfund National Priorities List boundaries
+    source_url: https://edg.epa.gov/data/PUBLIC/OLEM/OLEM-OSRTI/
+    pattern: B
+    refresh: monthly
+
+  env_epa_aqi:
+    schema: environmental
+    table: env_epa_aqi
+    raw_root: USA/contamination/env_epa_aqi
+    source_name: EPA AQS annual concentration by monitor
+    source_url: https://aqs.epa.gov/aqsweb/airdata/download_files.html
+    pattern: B
+    refresh: annual
+
+  env_epa_brownfields_acres:
+    schema: environmental
+    table: env_epa_brownfields_acres
+    raw_root: USA/contamination/env_epa_brownfields_acres
+    source_name: EPA ACRES Brownfields (KMZ)
+    source_url: https://www.epa.gov/frs/geospatial-data-download-service
+    pattern: B
+    refresh: quarterly
+
+  env_epa_landfill:
+    schema: environmental
+    table: env_epa_landfill
+    raw_root: USA/contamination/env_epa_landfill
+    source_name: EPA LMOP landfill data (xlsx)
+    source_url: https://www.epa.gov/lmop/lmop-landfill-and-project-database
+    pattern: B
+    refresh: annual
+
+  # ---- USA / infrastructure  (NOT in catalogue; URLs unchanged) ------------
+  tl_rails:
+    schema: infrastructure
+    table: tl_rails
+    raw_root: USA/infrastructure/tl_rails
+    source_name: Census TIGER/Line Rails
+    source_url: https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html
+    pattern: B
+    refresh: annual
+
+  tl_roads:
+    schema: infrastructure
+    table: tl_roads
+    raw_root: USA/infrastructure/tl_roads
+    source_name: Census TIGER/Line Primary Roads
+    source_url: https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html
+    pattern: B
+    refresh: annual
+
+  # ---- USA / refinery  (-> infrastructure?) --------------------------------
+  hifdl_refineries:
+    schema: infrastructure
+    table: hifdl_refineries
+    raw_root: USA/refinery/hifdl_refineries
+    source_name: HIFLD Petroleum Refineries (DataLumos mirror)
+    source_url: https://www.datalumos.org/datalumos/project/240514/version/V1/view
+    pattern: B
+    refresh: annual
+
+  # ---- USA / mining --------------------------------------------------------
+  # NOTE: staged data is OSMRE e-AMLIS (Problem_Status.geojson). The catalogue's
+  # federal-mining entry is a DIFFERENT dataset — USGS USMIN
+  # (https://mrdata.usgs.gov/usmin/state/usmin-CA.zip). Reconcile: keep OSMRE,
+  # switch to USMIN, or ingest both. (raw_root fixed to the source-key level.)
+  osmre_amlis:
+    schema: environmental
+    table: mining_osmre_amlis
+    raw_root: USA/mining/osmre_amlis
+    source_name: OSMRE e-AMLIS abandoned-mine problem areas
+    source_url: https://amlis.osmre.gov/
+    pattern: B
+    refresh: annual
+
+  # ---- USA / natural_hazard ------------------------------------------------
+  landslide_usgs_inventories:
+    schema: natural_hazard
+    table: landslide_usgs_inventories
+    raw_root: USA/natural_hazard/landslide_usgs_inventories
+    source_name: USGS US Landslide Inventory v3
+    source_url: https://www.usgs.gov/programs/landslide-hazards
+    pattern: A
+    refresh: annual
+
+  landslide_usgs_susceptibility:
+    schema: natural_hazard
+    table: landslide_usgs_susceptibility
+    raw_root: USA/natural_hazard/landslide_usgs_susceptibility
+    source_name: USGS Landslide Susceptibility
+    source_url: https://www.sciencebase.gov/catalog/item/65ccea5bd34ef4b119cb3bac
+    pattern: A
+    refresh: annual
+
+  seismic_usgs_nshm:
+    schema: natural_hazard
+    table: seismic_usgs_nshm
+    raw_root: USA/natural_hazard/seismic_usgs_nshm
+    source_name: USGS National Seismic Hazard Model (2023)
+    source_url: https://www.sciencebase.gov/catalog/item/644af897d34e45f6ddcd13b3
+    pattern: C
+    refresh: annual
+
+  seismic_usgs_qffd:
+    schema: natural_hazard
+    table: seismic_usgs_qffd
+    raw_root: USA/natural_hazard/seismic_usgs_qffd
+    source_name: USGS Quaternary Faults and Fold Database
+    source_url: https://www.usgs.gov/programs/earthquake-hazards/faults
+    pattern: B
+    refresh: annual
+
+  tornado_spc_tornado_tracks:
+    schema: natural_hazard
+    table: tornado_spc_tornado_tracks
+    raw_root: USA/natural_hazard/tornado_spc_tornado_tracks
+    source_name: NOAA SPC Tornado Tracks (1950-2025)
+    source_url: https://www.spc.noaa.gov/gis/svrgis/
+    pattern: B
+    refresh: annual
+
+  wildfire_nifc_fil:
+    schema: natural_hazard
+    table: wildfire_nifc_fil
+    raw_root: USA/natural_hazard/wildfire_nifc_fil
+    source_name: NIFC WFIGS incident locations (year-to-date)
+    source_url: https://data-nifc.opendata.arcgis.com/   # NIFC open data, no direct URL in catalogue
+    pattern: B
+    refresh: monthly
+
+  wildfire_usfs_whp:
+    schema: natural_hazard
+    table: wildfire_usfs_whp
+    raw_root: USA/natural_hazard/wildfire_usfs_whp
+    source_name: USFS Wildfire Hazard Potential
+    source_url: https://www.fs.usda.gov/rds/archive/products/RDS-2015-0047-4/
+    pattern: A
+    refresh: annual
+
+  wildfire_usgs_mtbs:
+    schema: natural_hazard
+    table: wildfire_usgs_mtbs
+    raw_root: USA/natural_hazard/wildfire_usgs_mtbs
+    source_name: MTBS burn severity (CONUS)
+    source_url: https://www.mtbs.gov/   # download delivered via emailed link
+    pattern: A
+    refresh: annual
+
+  # ---- USA / socioeconomic -------------------------------------------------
+  # NOTE: staged data is HUD Low-/Mod-Income by Block Group. The catalogue's
+  # socioeconomic entry is a DIFFERENT HUD dataset (Qualified Census Tracts).
+  hud_lmip:
+    schema: socioeconomic
+    table: hud_lmip
+    raw_root: USA/socioeconomic/hud_lmip
+    source_name: HUD Low- and Moderate-Income Population by Block Group
+    source_url: https://www.hudexchange.info/programs/acs-low-mod-summary-data/   # not in catalogue
+    pattern: A
+    refresh: annual
