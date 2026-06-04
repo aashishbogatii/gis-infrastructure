@@ -1,15 +1,10 @@
-"""The one layer that knows *where* data lives — local disk or S3.
+"""The one layer that knows *where* data lives: local disk or S3.
 
 Every function checks `config.IS_CLOUD` and does the right thing for that
 backend, so the rest of the code doesn't care which one is active:
 
     dev  -> local files under RAW_BASE / CURATED_BASE
     prod -> S3 (read in place via GDAL /vsis3/, written with s3fs)
-
-Folder layout is the same in both:
-
-    <base>/<raw_root>/<as_of>/<files>          # local
-    s3://<bucket>/<prefix>/<raw_root>/<as_of>/...  # cloud
 """
 import logging
 

@@ -1,10 +1,8 @@
 """Runner-owned geometry normalization.
 
-- CRS stored as EPSG:4326 (WGS84). Reprojection to a projected CRS for distance
-  is a query-time concern in Redshift, never done at write time.
+- CRS stored as EPSG:4326 (WGS84).
 - Geometry column named ``geometry``; all attribute columns lowercased.
-- Null/empty geometries are DROPPED and logged — not silently repaired with
-  ``buffer(0)``/``make_valid`` (per-source validity fixes belong in the transform).
+- Null/empty geometries are DROPPED
 """
 from __future__ import annotations
 

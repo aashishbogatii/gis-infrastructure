@@ -1,9 +1,4 @@
 """Runner-owned provenance stamping.
-
-Every curated row carries its own citation (scope §6.3, CONTEXT.md §3.5): the
-evidence is defensible at a Board of Equalization without a join back to a
-source dimension. Parquet dictionary-encodes these repeated strings, so the
-storage cost is negligible.
 """
 from __future__ import annotations
 

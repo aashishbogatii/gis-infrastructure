@@ -1,8 +1,7 @@
 """Config-driven transform runner.
 
 One engine reads ``registry.yaml`` and dispatches to a per-source transform
-module. The backend (local dev vs S3 prod) is chosen by GIS_ENV in .env and is
-fully hidden inside ``storage.py`` — the same command runs in both.
+module.
 
 Usage:
     python -m processing.run --list

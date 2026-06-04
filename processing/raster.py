@@ -1,8 +1,6 @@
 """Runner-owned raster -> vector helper.
 
-Some sources publish as rasters (hazard-class / susceptibility grids) but
-the warehouse keeps every source as a feature table. This module turns a
-single-band raster into a Pattern-A polygon ``GeoDataFrame`` so it flows
+This module turns a single-band raster into a polygon ``GeoDataFrame`` so it flows
 through the same runner path as every vector source (``geom.normalize`` ->
 provenance -> GeoParquet).
 
@@ -13,11 +11,11 @@ The work is windowed so it never loads a CONUS-scale grid at once:
 
 **Reclass before downsample, on purpose.** ``reclass`` maps native values to
 *severity-ordered* small ints (0 = drop / not-a-hazard). Block-max then keeps
-the worst hazard in each coarse cell — and because non-hazard codes map to 0
+the worst hazard in each coarse cell and because non-hazard codes map to 0
 first, a "water"/"non-burnable" code can never outrank a real class.
 
 The returned geometries are in the raster's **native CRS**; the runner's
-``geom.normalize`` reprojects to EPSG:4326 (we never reproject at write time).
+``geom.normalize`` reprojects to EPSG:4326.
 """
 from __future__ import annotations
 
