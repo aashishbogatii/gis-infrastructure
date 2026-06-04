@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import time
 
 import yaml
 
@@ -52,9 +53,13 @@ def run_one(source_key: str, *, as_of_override: str | None = None) -> str:
     logger.info(f"{source_key} as_of={as_of}")
     logger.info(f"src={storage.raw_uri(raw_root, as_of)}")
 
+    t_start = time.perf_counter()
     module = importlib.import_module(f"processing.transforms.{source_key}")
     src = storage.raw_uri(raw_root, as_of)
+
+    t0 = time.perf_counter()
     gdf = module.transform(source_uri=src, config=cfg)
+    t_transform = time.perf_counter() - t0
     logger.info(f"transform -> {len(gdf):,} rows, crs={gdf.crs}")
 
     gdf = geom.normalize(gdf)
@@ -66,10 +71,19 @@ def run_one(source_key: str, *, as_of_override: str | None = None) -> str:
     )
     target = storage.curated_target(cfg["schema"], cfg["table"], as_of)
     storage.ensure_parent(target)
+
+    t0 = time.perf_counter()
     gdf.to_parquet(target, index=False)  # GeoParquet (WKB geometry)
+    t_write = time.perf_counter() - t0
+
+    t_total = time.perf_counter() - t_start
     logger.info(
         f"wrote {len(gdf):,} rows "
         f"({len(gdf.columns)} cols, WKB geom) -> {target}"
+    )
+    logger.info(
+        f"timing {source_key}: total={t_total:.1f}s "
+        f"(transform={t_transform:.1f}s, write={t_write:.1f}s)"
     )
     return target
 
@@ -102,6 +116,7 @@ def run_all(*, as_of_override: str | None = None) -> int:
     logger.info(f"running {len(keys)} source(s): {keys}\n")
     ok: list[str] = []
     failed: list[tuple[str, str]] = []
+    t_start = time.perf_counter()
     for key in keys:
         try:
             run_one(key, as_of_override=as_of_override)
@@ -110,7 +125,11 @@ def run_all(*, as_of_override: str | None = None) -> int:
             failed.append((key, repr(e)))
             logger.error(f"FAILED {key}: {e!r}")
 
-    logger.info(f"done: {len(ok)} ok, {len(failed)} failed")
+    t_total = time.perf_counter() - t_start
+    logger.info(
+        f"done: {len(ok)} ok, {len(failed)} failed "
+        f"in {t_total:.1f}s"
+    )
     for key, err in failed:
         logger.info(f"  - {key}: {err}")
     return 1 if failed else 0
