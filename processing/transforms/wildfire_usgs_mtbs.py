@@ -26,8 +26,8 @@ CLASS_FIELD = "severity_class"  # 2 low, 3 moderate, 4 high
 
 
 def _reclass(a: np.ndarray) -> np.ndarray:
-    # Keep burn-severity 2/3/4 (already severity-ordered); drop 0/1/5/6.
-    return np.where((a >= 2) & (a <= 4), a, 0).astype(np.uint8)
+    # Keep burn-severity 2/3/4 (already severity-ordered); drop 0/5/6.
+    return np.where((a >= 1) & (a <= 4), a, 0).astype(np.uint8)
 
 
 def transform(*, source_uri: str, config: dict) -> gpd.GeoDataFrame:

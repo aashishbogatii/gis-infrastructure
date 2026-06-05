@@ -7,8 +7,7 @@ polygonized.
 
 Because the index is a noisy continuous surface, polygonizing at native
 resolution yields ~100M slivers. We block-max downsample to ~700 m first
-(factor 8) — keeping the worst susceptibility in each coarse cell which gives
-~1.5M clean polygons while preserving parcel-level resolution
+(factor 8) keeping the worst susceptibility in each coarse cell which gives
 """
 from __future__ import annotations
 
