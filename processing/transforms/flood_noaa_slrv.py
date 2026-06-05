@@ -3,7 +3,7 @@
 Ships as 7 regional GeoPackages, each holding inundation polygons for 21 water
 levels (0.0–10.0 ft, 0.5 ft steps) in two flavours: ``slr`` (hydrologically
 connected inundation) and ``low`` (low-lying, disconnected areas). This
-transform reads every selected layer across all 7 files, derives
+transform reads every layer across all 7 files, derives
 ``region`` / ``scenario_type`` / ``scenario_ft`` from the layer
 name, and concatenates them into one table.
 """
@@ -43,7 +43,6 @@ def _read_layer(
 def transform(*, source_uri: str, config: dict) -> gpd.GeoDataFrame:
     raw_root = config["raw_root"]
     as_of = config["source_as_of"]
-    depths = config.get("depths")
 
     gpkg_files = storage.list_vintage_files(raw_root, as_of, GPKG_GLOB)
     if not gpkg_files:
@@ -58,8 +57,6 @@ def transform(*, source_uri: str, config: dict) -> gpd.GeoDataFrame:
                 logger.debug(f"skip unrecognized layer {name}")
                 continue
             depth = float(f'{m["d"]}.{m["f"]}')
-            if depths is not None and depth not in depths:
-                continue
             logger.info(f"reading {name} from {gpkg}")
             frames.append(
                 _read_layer(uri, name, m["region"], m["type"], depth)
