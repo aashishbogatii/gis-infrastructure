@@ -3,9 +3,7 @@
 Reads the ``CGS_Alquist_Priolo_Fault_Zones`` polygon layer straight from the
 shapefile *inside the zip*, in place, via GDAL's ``/vsizip/`` virtual
 filesystem. Keeps the zone identity, zone-level release/revision and
-map/report-link evidence columns; drops the map-publication and previous-date
-bookkeeping columns (``MAP_RELEAS``, ``MAP_REVISE``, ``PREV_MAP_R``,
-``PREV_ZN_RE``, ``COMMENTS``).
+map/report-link evidence columns.
 """
 from __future__ import annotations
 

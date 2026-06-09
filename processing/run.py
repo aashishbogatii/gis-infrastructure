@@ -44,7 +44,6 @@ def run_one(source_key: str, *, as_of_override: str | None = None) -> str:
         raw_root, pin=as_of_override or cfg.get("pinned_as_of")
     )
 
-    # Manifest (vintage truth) overrides the registry row where they overlap.
     manifest = storage.read_manifest(raw_root, as_of)
     cfg = {**cfg, **manifest, "source_as_of": as_of}
 
