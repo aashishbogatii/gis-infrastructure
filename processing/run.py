@@ -94,21 +94,16 @@ def _transform_exists(key: str) -> bool:
         return False
 
 
-def run_all(*, as_of_override: str | None = None) -> int:
-    """Run every source that has a transform, sequentially (local batch).
+def _run_batch(keys: list[str], *, as_of_override: str | None = None) -> int:
+    """Run a list of source keys sequentially (local batch).
 
     Continues past a failing source and reports a summary at the end, so one
     bad source doesn't abort the whole run. This is the LOCAL convenience path
     only — in prod, Step Functions fans one Lambda per source instead (a single
     process looping all sources would blow Lambda's per-invocation limits).
     """
-    registry = load_registry()
-    keys = [k for k in sorted(registry) if _transform_exists(k)]
-    skipped = [k for k in sorted(registry) if not _transform_exists(k)]
-    if skipped:
-        logger.info(f"skipping {len(skipped)} registry-only row(s): {skipped}")
     if not keys:
-        logger.info("no transforms implemented yet — nothing to run.")
+        logger.info("nothing to run.")
         return 0
 
     logger.info(f"running {len(keys)} source(s): {keys}\n")
@@ -131,6 +126,19 @@ def run_all(*, as_of_override: str | None = None) -> int:
     for key, err in failed:
         logger.info(f"  - {key}: {err}")
     return 1 if failed else 0
+
+
+def run_all(*, as_of_override: str | None = None) -> int:
+    """Run every source that has a transform (local batch)."""
+    registry = load_registry()
+    keys = [k for k in sorted(registry) if _transform_exists(k)]
+    skipped = [k for k in sorted(registry) if not _transform_exists(k)]
+    if skipped:
+        logger.info(f"skipping {len(skipped)} registry-only row(s): {skipped}")
+    if not keys:
+        logger.info("no transforms implemented yet — nothing to run.")
+        return 0
+    return _run_batch(keys, as_of_override=as_of_override)
 
 
 def _list() -> None:

@@ -3,5 +3,3 @@ CLAUDE.md
 __pycache__/
 .venv/
 docs
-lambda_handler.py
-requirements.txt
