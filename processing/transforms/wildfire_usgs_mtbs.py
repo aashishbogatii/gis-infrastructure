@@ -42,11 +42,12 @@ def transform(*, source_uri: str, config: dict) -> gpd.GeoDataFrame:
     # The GeoTIFF sits at the zip root, named like the zip stem,
     # e.g. mtbs_CONUS_2026.tif
     inner = f"{Path(zip_name).stem}.tif"
-    uri = storage.gdal_uri(raw_root, as_of, zip_name, inner=inner)
-    logger.info(f"reading {inner} from {zip_name}")
+    
+    tif = storage.local_zip_member(raw_root, as_of, zip_name, inner)
+    logger.info(f"reading {inner} from local cache")
 
     return raster.polygonize(
-        uri,
+        tif,
         reclass=_reclass,
         downsample=DOWNSAMPLE,
         class_field=CLASS_FIELD,

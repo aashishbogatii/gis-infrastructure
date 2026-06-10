@@ -23,17 +23,16 @@ logger = logging.getLogger(__name__)
 ZIP_GLOB = "lw_susc*.zip"
 INNER = "lw_susc/lw_conus.tif"
 DOWNSAMPLE = 8  # ~87 m native -> ~700 m cells
-CLASS_FIELD = "susceptibility_class"  # 1 low .. 4 very high
+CLASS_FIELD = "susceptibility_class"  # 1 moderate .. 3 very high
 
 
 def _reclass(a: np.ndarray) -> np.ndarray:
     # Source susceptibility index ranges 0-81 (0 = none, dropped). Even
     # quartiles of 1-81; final thresholds pending scoring methodology.
     out = np.zeros(a.shape, dtype=np.uint8)
-    out[(a >= 1) & (a <= 20)] = 1   # low
-    out[(a >= 21) & (a <= 40)] = 2  # moderate
-    out[(a >= 41) & (a <= 60)] = 3  # high
-    out[(a >= 61) & (a <= 81)] = 4  # very high
+    out[(a >= 21) & (a <= 40)] = 1  # moderate
+    out[(a >= 41) & (a <= 60)] = 2  # high
+    out[(a >= 61) & (a <= 81)] = 3  # very high
     return out
 
 
@@ -46,11 +45,12 @@ def transform(*, source_uri: str, config: dict) -> gpd.GeoDataFrame:
         raise FileNotFoundError(f"No {ZIP_GLOB} in {source_uri}")
     zip_name = sorted(zips)[0]
 
-    uri = storage.gdal_uri(raw_root, as_of, zip_name, inner=INNER)
-    logger.info(f"reading {INNER} from {zip_name}")
+    # Extract the TIF to local disk first.
+    tif = storage.local_zip_member(raw_root, as_of, zip_name, INNER)
+    logger.info(f"reading {INNER} from local cache")
 
     return raster.polygonize(
-        uri,
+        tif,
         reclass=_reclass,
         downsample=DOWNSAMPLE,
         class_field=CLASS_FIELD,

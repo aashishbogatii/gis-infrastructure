@@ -50,7 +50,7 @@ def transform(*, source_uri: str, config: dict) -> gpd.GeoDataFrame:
 
     frames = []
     for gpkg in sorted(gpkg_files):
-        uri = storage.gdal_uri(raw_root, as_of, gpkg)
+        uri = storage.local_file(raw_root, as_of, gpkg)
         for name, _geom in pyogrio.list_layers(uri):
             m = LAYER_RE.match(name)
             if not m:
