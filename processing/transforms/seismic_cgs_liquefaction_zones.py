@@ -1,4 +1,4 @@
-"""CGS Seismic Hazards Program — Liquefaction Zones (California). Pattern A.
+"""CGS Seismic Hazards Program: Liquefaction Zones
 
 Reads the ``CGS_Liquefaction_Zones`` polygon layer straight from the shapefile
 *inside the zip*, in place, via GDAL's ``/vsizip/`` virtual filesystem. Keeps

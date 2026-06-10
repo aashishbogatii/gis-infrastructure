@@ -1,4 +1,4 @@
-"""NOAA Sea Level Rise Viewer — inundation polygons (California)
+"""NOAA Sea Level Rise Viewer
 
 Ships as 7 regional GeoPackages, each holding inundation polygons for 21 water
 levels (0.0–10.0 ft, 0.5 ft steps) in two flavours: ``slr`` (hydrologically

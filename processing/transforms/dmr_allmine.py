@@ -1,4 +1,4 @@
-"""CA DOC DMR All Mines. Pattern B (distance decay).
+"""CA DOC DMR All Mines
 
 Mine sites regulated under SMARA (Dept. of Conservation, Division of Mine
 Reclamation) — proximity to an active/abandoned mine is the value signal. A

@@ -1,4 +1,4 @@
-"""CA SWRCB GeoTracker cleanup / LUST sites. Pattern B (distance decay).
+"""CA SWRCB GeoTracker cleanup / LUST sites.
 
 Point sites that impact water quality (leaking underground storage tanks,
 cleanup program sites) — proximity to an open case is the value signal. Published

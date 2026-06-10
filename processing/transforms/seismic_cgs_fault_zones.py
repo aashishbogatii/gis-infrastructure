@@ -1,4 +1,4 @@
-"""CGS Alquist-Priolo Earthquake Fault Zones (California). Pattern A.
+"""CGS Alquist-Priolo Earthquake Fault Zones
 
 Reads the ``CGS_Alquist_Priolo_Fault_Zones`` polygon layer straight from the
 shapefile *inside the zip*, in place, via GDAL's ``/vsizip/`` virtual

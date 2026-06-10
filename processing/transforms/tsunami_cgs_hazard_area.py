@@ -1,4 +1,4 @@
-"""CGS Tsunami Hazard Areas (California). Pattern A.
+"""CGS Tsunami Hazard Areas (California)
 
 Reads the ``CA_Tsunami_Hazard_Area`` polygon layer from the shapefile *inside
 the zip* (nested one folder deep), in place, via GDAL's ``/vsizip/`` virtual

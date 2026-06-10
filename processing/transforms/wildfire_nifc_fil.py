@@ -1,4 +1,4 @@
-"""NIFC WFIGS incident locations (year-to-date)
+"""NIFC WFIGS incident locations
 
 Reads the ``Incidents`` point layer straight from the shapefile *inside the
 zip*, in place, via GDAL's ``/vsizip/`` virtual filesystem.

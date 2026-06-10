@@ -1,4 +1,4 @@
-"""USGS US Landslide Inventory v3 — nationwide.
+"""USGS US Landslide Inventory v3
 
 Reads the polygon layer ``us_ls_v3_poly`` straight from the shapefile *inside
 the zip*, in place, via GDAL's ``/vsizip/`` virtual filesystem.

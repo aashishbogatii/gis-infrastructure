@@ -1,10 +1,6 @@
 """OSMRE e-AMLIS abandoned-mine problem areas
-(proximity to abandoned-mine hazards: subsidence, AMD, open shafts).
 
 Reads the GeoJSON point layer directly via GDAL's GeoJSON driver. 
-
-(Registry note: the curated table is ``mining_osmre_amlis``; this module name
-matches the registry key ``osmre_amlis``.)
 """
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""CGS Seismic Hazards Program — Landslide Zones (California). Pattern A.
+"""CGS Seismic Hazards Program: Landslide Zones
 
 Reads the ``CGS_Landslide_Zones`` polygon layer straight from the shapefile
 *inside the zip*, in place, via GDAL's ``/vsizip/`` virtual filesystem. Keeps

@@ -1,4 +1,4 @@
-"""CAL FIRE Wildland-Urban Interface (California). Pattern A.
+"""CAL FIRE Wildland-Urban Interface (California)
 
 Reads the ``Wildland_Urban_Interface`` polygon layer straight from the
 shapefile *inside the zip*, in place, via GDAL's ``/vsizip/`` virtual

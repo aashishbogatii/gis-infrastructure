@@ -1,4 +1,4 @@
-"""CEC / Cal-Adapt cooling cost, by CA 2020 census tract. Pattern A.
+"""CEC / Cal-Adapt cooling cost
 
 Downscaled CMIP6 (LOCA2, SSP2-4.5, 3-model ensemble) summarized to one row per
 tract: cooling degree-days and the modeled cooling-electricity dollar burden per

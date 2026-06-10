@@ -1,13 +1,10 @@
-"""FEMA National Flood Hazard Layer (NFHL) — California subset. Pattern A.
+"""FEMA National Flood Hazard Layer (NFHL)
 
 Reads the ``S_FLD_HAZ_AR`` (flood hazard areas) layer straight from the
 published file geodatabase *inside the zip*, in place, via GDAL's ``/vsizip/``
 virtual filesystem — no extraction, no rename. Works identically in dev (local
 zip) and prod (zip on S3, streamed via ``/vsizip//vsis3/``) because file
 discovery and URI building are delegated to ``storage``.
-
-The source ships in EPSG:4269 (NAD83); the runner's ``geom.normalize``
-reprojects to EPSG:4326.
 """
 from __future__ import annotations
 

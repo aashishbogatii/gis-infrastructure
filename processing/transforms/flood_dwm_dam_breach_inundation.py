@@ -1,4 +1,4 @@
-"""CA DWR dam-breach inundation boundaries. Pattern A (containment).
+"""CA DWR dam-breach inundation boundaries
 
 Approved inundation maps showing the area flooded if a dam fails — a parcel
 inside a boundary carries the risk. Polygon shapefile read in place from inside

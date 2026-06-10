@@ -1,11 +1,9 @@
-"""EPA LMOP landfill database — nationwide. Pattern B.
+"""EPA LMOP landfill database
 
 An Excel workbook; the data lives on the ``LMOP Database`` sheet (the
 workbook also has ``Summary`` and ``Field Descriptions`` sheets, which we
 ignore). Read in place via GDAL's XLSX driver. Point geometry is built from
 ``Latitude``/``Longitude`` columns; the runner keeps the EPSG:4326 points.
-
-Columns are selected and renamed to the STTM target names.
 """
 from __future__ import annotations
 

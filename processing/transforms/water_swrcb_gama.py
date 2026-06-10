@@ -1,4 +1,4 @@
-"""CA SWRCB GAMA groundwater quality. Pattern B (distance decay).
+"""CA SWRCB GAMA groundwater quality
 
 Per-sample chemical results at monitoring wells from the Groundwater Ambient
 Monitoring & Assessment program — proximity to a well with detections is the

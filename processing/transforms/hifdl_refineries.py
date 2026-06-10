@@ -1,13 +1,8 @@
-"""HIFLD Petroleum Refineries (DataLumos mirror) — nationwide. Pattern B
-(refinery proximity: air, odor, noise, explosion/blight).
+"""HIFLD Petroleum Refineries
 
 Reads the ``Petroleum_Refinery`` point shapefile straight from *inside the zip*
 via GDAL's ``/vsizip/`` virtual filesystem. The native point geometry is used
 directly (the redundant Latitude/Longitude attribute columns are dropped).
-Columns are selected and renamed to the STTM target names.
-
-The source ships in EPSG:3857 (Web Mercator); the runner's ``geom.normalize``
-reprojects to EPSG:4326.
 """
 from __future__ import annotations
 

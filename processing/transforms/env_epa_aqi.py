@@ -1,11 +1,9 @@
-"""EPA AQS annual concentration by monitor — nationwide. Pattern B.
+"""EPA AQS annual concentration by monitor
 
 A flat CSV of monitor-level annual air-quality statistics, read in place from
 *inside the zip* via GDAL's ``/vsizip/`` virtual filesystem. The monitor point
 geometry is built from the ``Latitude``/``Longitude`` columns (the CSV carries
 no geometry); the runner keeps the resulting EPSG:4326 points.
-
-Columns are selected and renamed to the STTM target names.
 """
 from __future__ import annotations
 

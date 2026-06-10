@@ -1,12 +1,9 @@
-"""EPA Superfund National Priorities List boundaries — nationwide. Pattern B.
+"""EPA Superfund National Priorities List boundaries
 
 Reads the ``SITE_BOUNDARIES_SF`` polygon layer from the published file
 geodatabase *inside the zip*, in place, via GDAL's ``/vsizip/`` virtual
 filesystem (the gdb also ships line/point/IC/OU layers, which we ignore — the
 site boundary polygons are the evidentiary geometry).
-
-Columns are selected and renamed to the STTM target names. The source ships
-in EPSG:4326; the runner's ``geom.normalize`` re-asserts the CRS (no-op).
 """
 from __future__ import annotations
 

@@ -1,5 +1,4 @@
-"""HUD Low- and Moderate-Income Population by Block Group — nationwide.
-Pattern A (parcel-in-block-group containment; low-/moderate-income share).
+"""HUD Low- and Moderate-Income Population by Block Group
 
 Reads the block-group polygon shapefile straight from *inside the zip* via
 GDAL's ``/vsizip/`` virtual filesystem.
