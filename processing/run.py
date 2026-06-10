@@ -71,7 +71,7 @@ def run_one(source_key: str, *, as_of_override: str | None = None) -> str:
     storage.ensure_parent(target)
 
     t0 = time.perf_counter()
-    storage.write_parquet(gdf, target)  # GeoParquet (WKB geometry)
+    storage.write_parquet(gdf, target)
     t_write = time.perf_counter() - t0
 
     t_total = time.perf_counter() - t_start
@@ -94,42 +94,9 @@ def _transform_exists(key: str) -> bool:
         return False
 
 
-def _run_batch(keys: list[str], *, as_of_override: str | None = None) -> int:
-    """Run a list of source keys sequentially (local batch).
-
-    Continues past a failing source and reports a summary at the end, so one
-    bad source doesn't abort the whole run. This is the LOCAL convenience path
-    only — in prod, Step Functions fans one Lambda per source instead (a single
-    process looping all sources would blow Lambda's per-invocation limits).
-    """
-    if not keys:
-        logger.info("nothing to run.")
-        return 0
-
-    logger.info(f"running {len(keys)} source(s): {keys}\n")
-    ok: list[str] = []
-    failed: list[tuple[str, str]] = []
-    t_start = time.perf_counter()
-    for key in keys:
-        try:
-            run_one(key, as_of_override=as_of_override)
-            ok.append(key)
-        except Exception as e:  # batch run: report and keep going
-            failed.append((key, repr(e)))
-            logger.error(f"FAILED {key}: {e!r}")
-
-    t_total = time.perf_counter() - t_start
-    logger.info(
-        f"done: {len(ok)} ok, {len(failed)} failed "
-        f"in {t_total:.1f}s"
-    )
-    for key, err in failed:
-        logger.info(f"  - {key}: {err}")
-    return 1 if failed else 0
-
-
 def run_all(*, as_of_override: str | None = None) -> int:
     """Run every source that has a transform (local batch)."""
+
     registry = load_registry()
     keys = [k for k in sorted(registry) if _transform_exists(k)]
     skipped = [k for k in sorted(registry) if not _transform_exists(k)]
@@ -138,7 +105,9 @@ def run_all(*, as_of_override: str | None = None) -> int:
     if not keys:
         logger.info("no transforms implemented yet — nothing to run.")
         return 0
-    return _run_batch(keys, as_of_override=as_of_override)
+    for key in keys:
+        run_one(key, as_of_override=as_of_override)
+    return 0
 
 
 def _list() -> None:

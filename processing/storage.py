@@ -14,6 +14,7 @@ import fnmatch
 import json
 import re
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 
 from . import config
@@ -36,7 +37,7 @@ def parse_partition(name: str) -> date | None:
     return None
 
 
-# S3 client. Imported lazily so local dev doesn't need s3fs installed.
+@lru_cache(maxsize=1)
 def _fs():
     import s3fs
 
