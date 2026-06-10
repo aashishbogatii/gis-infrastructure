@@ -118,8 +118,6 @@ sources:
     raw_root: USA/contamination/env_epa_superfund_npl
     source_name: EPA Superfund National Priorities List boundaries
     source_url: https://edg.epa.gov/data/PUBLIC/OLEM/OLEM-OSRTI/
-    pattern: B
-    refresh: monthly
 
   env_epa_aqi:
     schema: environmental
@@ -127,8 +125,6 @@ sources:
     raw_root: USA/contamination/env_epa_aqi
     source_name: EPA AQS annual concentration by monitor
     source_url: https://aqs.epa.gov/aqsweb/airdata/download_files.html
-    pattern: B
-    refresh: annual
 
   env_epa_brownfields_acres:
     schema: environmental
@@ -136,8 +132,6 @@ sources:
     raw_root: USA/contamination/env_epa_brownfields_acres
     source_name: EPA ACRES Brownfields (KMZ)
     source_url: https://www.epa.gov/frs/geospatial-data-download-service
-    pattern: B
-    refresh: quarterly
 
   env_epa_landfill:
     schema: environmental
@@ -145,8 +139,6 @@ sources:
     raw_root: USA/contamination/env_epa_landfill
     source_name: EPA LMOP landfill data (xlsx)
     source_url: https://www.epa.gov/lmop/lmop-landfill-and-project-database
-    pattern: B
-    refresh: annual
 
   tl_rails:
     schema: infrastructure
