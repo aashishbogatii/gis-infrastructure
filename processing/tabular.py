@@ -1,11 +1,8 @@
 """Runner-owned helper: flat table (CSV/XLSX/Parquet) -> GeoDataFrame.
 
-Some sources publish geometry inside a plain table rather than a native vector
-format: lat/lon columns (EPA AQS, LMOP) or a WKT string column (Cal-Adapt
-climate Parquet). ``read_points`` builds POINT geometry from coordinate columns;
+``read_points`` builds POINT geometry from coordinate columns;
 ``from_wkt`` parses a WKT column. Both set the CRS so the rest of the path
 matches a native-vector source.
-
 """
 from __future__ import annotations
 
@@ -61,12 +58,6 @@ def from_wkt(
     src_crs: str = "EPSG:4326",
 ) -> gpd.GeoDataFrame:
     """Flat table with a WKT geometry column -> GeoDataFrame.
-
-    Some sources publish polygons as a Well-Known-Text string column in a plain
-    table (e.g. the Cal-Adapt climate Parquet, one row per census tract). Parse
-    that column into geometry and set the CRS, so the rest of the path matches a
-    native-vector source. Null/empty WKT becomes a null geometry, which
-    ``geom.normalize`` drops-and-logs downstream.
     """
     cols = [c for c in keep if c in df.columns]
     missing = [c for c in keep if c not in df.columns]
