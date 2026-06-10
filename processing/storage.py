@@ -147,6 +147,69 @@ def open_binary(raw_root: str, as_of: str, filename: str):
     return open(config.RAW_BASE / raw_root / as_of / filename, "rb")
 
 
+def local_file(raw_root: str, as_of: str, filename: str) -> str:
+    """Materialize a raw file onto local disk and return its path. On S3 this
+    downloads the file to a temp folder; in dev it returns the existing path.
+    Idempotent: skips download if the file is already cached and non-empty.
+
+    Unlike ``local_zip_member``, dev needs no copy — the raw file is already a
+    usable plain file on disk — so dev returns the original path directly.
+    """
+    if not config.IS_CLOUD:
+        return str(config.RAW_BASE / raw_root / as_of / filename)
+
+    import tempfile
+
+    cache = Path(tempfile.gettempdir()) / "_raw_cache" / raw_root / as_of
+    out_path = cache / filename
+    if out_path.exists() and out_path.stat().st_size > 0:
+        logger.debug(f"file cached: {out_path}")
+        return str(out_path)
+
+    cache.mkdir(parents=True, exist_ok=True)
+    key = f"{config.S3_RAW_BUCKET}/{_raw_key(raw_root, as_of)}/{filename}"
+    logger.info(f"downloading {filename} -> {out_path}")
+    _fs().get(key, str(out_path))
+    return str(out_path)
+
+
+def local_zip_member(
+    raw_root: str,
+    as_of: str,
+    zip_name: str,
+    inner: str,
+) -> str:
+    """Materialize a file from inside a zip onto local disk; return its path.
+    On S3 this downloads the zip to a temp folder and extracts the member; in
+    dev it extracts the member directly from the local zip file. Idempotent:
+    skips download and extraction if the member is already cached and non-empty.
+    """
+    import tempfile
+    import zipfile
+
+    cache = Path(tempfile.gettempdir()) / "_raw_cache" / raw_root / as_of
+    out_path = cache / inner
+    if out_path.exists() and out_path.stat().st_size > 0:
+        logger.debug(f"zip member cached: {out_path}")
+        return str(out_path)
+
+    cache.mkdir(parents=True, exist_ok=True)
+    if config.IS_CLOUD:
+        local_zip = cache / zip_name
+        base = _raw_key(raw_root, as_of)
+        key = f"{config.S3_RAW_BUCKET}/{base}/{zip_name}"
+        logger.info(f"downloading {zip_name} -> {local_zip}")
+        _fs().get(key, str(local_zip))
+        zip_path = local_zip
+    else:
+        zip_path = config.RAW_BASE / raw_root / as_of / zip_name
+
+    logger.info(f"extracting {inner} from {zip_name}")
+    with zipfile.ZipFile(zip_path) as zf:
+        zf.extract(inner, path=cache)
+    return str(out_path)
+
+
 def gdal_uri(
     raw_root: str, as_of: str, filename: str, inner: str = ""
 ) -> str:
@@ -192,3 +255,18 @@ def ensure_parent(target: str) -> None:
     has no real folders."""
     if not config.IS_CLOUD:
         Path(target).parent.mkdir(parents=True, exist_ok=True)
+
+
+def write_parquet(gdf, target: str) -> None:
+    """Write a GeoDataFrame to the curated target in either backend.
+
+    geopandas' ``to_parquet`` hands the path straight to pyarrow, which only
+    accepts a local filesystem path — not an ``s3://`` URI. So on S3 we open the
+    object with s3fs and write through that file handle; in dev we write the
+    local path directly.
+    """
+    if config.IS_CLOUD:
+        with _fs().open(target, "wb") as f:
+            gdf.to_parquet(f, index=False)
+    else:
+        gdf.to_parquet(target, index=False)

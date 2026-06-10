@@ -25,8 +25,8 @@ CURATED_BASE = Path(os.getenv("GIS_CURATED_BASE", r"D:\curated"))
 # Prod: S3 buckets. A prefix lets raw and curated share one bucket
 S3_RAW_BUCKET = os.getenv("GIS_S3_RAW_BUCKET", "low-appeal-agents-us-gis-data")
 S3_CURATED_BUCKET = os.getenv("GIS_S3_CURATED_BUCKET", "low-appeal-agents-us-gis-data")
-S3_RAW_PREFIX = os.getenv("GIS_S3_RAW_PREFIX", "").strip("/")
-S3_CURATED_PREFIX = os.getenv("GIS_S3_CURATED_PREFIX", "").strip("/")
+S3_RAW_PREFIX = os.getenv("GIS_S3_RAW_PREFIX", "raw").strip().strip("/")
+S3_CURATED_PREFIX = os.getenv("GIS_S3_CURATED_PREFIX", "curated").strip().strip("/")
 
 REGISTRY_PATH = Path(__file__).with_name("registry.yaml")
 

@@ -71,7 +71,7 @@ def run_one(source_key: str, *, as_of_override: str | None = None) -> str:
     storage.ensure_parent(target)
 
     t0 = time.perf_counter()
-    gdf.to_parquet(target, index=False)  # GeoParquet (WKB geometry)
+    storage.write_parquet(gdf, target)  # GeoParquet (WKB geometry)
     t_write = time.perf_counter() - t0
 
     t_total = time.perf_counter() - t_start
