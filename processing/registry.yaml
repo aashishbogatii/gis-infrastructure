@@ -230,3 +230,10 @@ sources:
     raw_root: USA/socioeconomic/hud_lmip
     source_name: HUD Low- and Moderate-Income Population by Block Group
     source_url: https://hudgis-hud.opendata.arcgis.com/datasets/HUD::low-to-moderate-income-population-by-block-group/about
+
+  crime_ca:
+    schema: crime
+    table: crime_ca
+    raw_root: California/crime/crime_ca
+    source_name: CA municipal crime incident reports (LAPD, SFPD, Sacramento PD, Ventura PD)
+    source_url: https://data.lacity.org/Public-Safety/Crime-Data-from-2020-to-Present/2nrs-mtv8
