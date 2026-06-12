@@ -1,15 +1,10 @@
-# Source registry — the machine-readable STTM
-# One row per source found under D:\raw. The runner iterates this.
-#
+# Source registry
 # Fields:
-#   schema        target schema (see NOTE on mappings below)
+#   schema        target schema]
 #   table         target table == source_key by convention
 #   raw_root      path under RAW_BASE down to (not including) the <as_of> dir
 #   source_name   human citation
 #   source_url    canonical landing / agency page  (from GIS catalogue)
-#   pattern       A=polygon containment | B=distance decay | C=compound
-#   refresh       update cadence
-#
 
 sources:
 
