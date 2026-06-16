@@ -31,9 +31,8 @@ LAYER_RE = re.compile(
 def _read_layer(
     uri: str, layer: str, region: str, scenario: str, depth: float
 ) -> gpd.GeoDataFrame:
-    gdf = gpd.read_file(uri, layer=layer, engine="pyogrio")
-    gdf = gdf.to_crs(4326)          
-    gdf = gdf[[gdf.geometry.name]].copy()
+    gdf = gpd.read_file(uri, layer=layer, engine="pyogrio", columns=[])
+    gdf = gdf.to_crs(4326)
     gdf["region"] = region
     gdf["scenario_type"] = scenario
     gdf["scenario_ft"] = depth
@@ -64,5 +63,5 @@ def transform(*, source_uri: str, config: dict) -> gpd.GeoDataFrame:
 
     if not frames:
         raise ValueError("no SLRV layers matched the selection")
-
+    
     return gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs=4326)

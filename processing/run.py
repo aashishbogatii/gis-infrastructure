@@ -60,7 +60,10 @@ def run_one(source_key: str, *, as_of_override: str | None = None) -> str:
     t_transform = time.perf_counter() - t0
     logger.info(f"transform -> {len(gdf):,} rows, crs={gdf.crs}")
 
+    logger.info("Normalizing geometry")
     gdf = geom.normalize(gdf)
+
+    logger.info("Stamping provenance")
     gdf = metadata.stamp(
         gdf,
         source_name=cfg["source_name"],
@@ -71,6 +74,7 @@ def run_one(source_key: str, *, as_of_override: str | None = None) -> str:
     storage.ensure_parent(target)
 
     t0 = time.perf_counter()
+    logger.info(f"writing parquet -> {target}")
     storage.write_parquet(gdf, target)
     t_write = time.perf_counter() - t0
 

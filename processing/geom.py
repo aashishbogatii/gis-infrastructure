@@ -23,10 +23,10 @@ def normalize(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         logger.debug(f"reprojecting {gdf.crs} -> {TARGET_CRS}")
         gdf = gdf.to_crs(TARGET_CRS)
 
-    gdf = gdf.rename(columns=str.lower)
+    gdf.rename(columns=str.lower, inplace=True)
     if gdf.geometry.name != "geometry":
-        gdf = gdf.rename_geometry("geometry")
-    gdf = gdf.set_geometry("geometry")
+        gdf.rename_geometry("geometry", inplace=True)
+    gdf.set_geometry("geometry", inplace=True)
 
     mask = gdf.geometry.notna() & ~gdf.geometry.is_empty
     dropped = int((~mask).sum())

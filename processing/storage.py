@@ -16,8 +16,12 @@ import re
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
+import pyarrow as pa
+import pyarrow.parquet as pq
+import pandas as pd
 
 from . import config
+
 
 # Vintage folder names we understand.
 _ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")        # 2026-04-29
@@ -136,11 +140,6 @@ def read_manifest(raw_root: str, as_of: str) -> dict:
 
 def open_binary(raw_root: str, as_of: str, filename: str):
     """Open a raw file as a binary file-like object in either backend.
-
-    For formats GDAL's vsi layer can't usefully expose (e.g. a KMZ whose
-    attributes live in per-placemark description HTML), a transform needs the
-    bytes directly. Returns a context-manager file object: a local handle in
-    dev, an s3fs handle in prod.
     """
     if config.IS_CLOUD:
         key = f"{config.S3_RAW_BUCKET}/{_raw_key(raw_root, as_of)}/{filename}"
@@ -151,10 +150,6 @@ def open_binary(raw_root: str, as_of: str, filename: str):
 def local_file(raw_root: str, as_of: str, filename: str) -> str:
     """Materialize a raw file onto local disk and return its path. On S3 this
     downloads the file to a temp folder; in dev it returns the existing path.
-    Idempotent: skips download if the file is already cached and non-empty.
-
-    Unlike ``local_zip_member``, dev needs no copy — the raw file is already a
-    usable plain file on disk — so dev returns the original path directly.
     """
     if not config.IS_CLOUD:
         return str(config.RAW_BASE / raw_root / as_of / filename)
@@ -182,8 +177,7 @@ def local_zip_member(
 ) -> str:
     """Materialize a file from inside a zip onto local disk; return its path.
     On S3 this downloads the zip to a temp folder and extracts the member; in
-    dev it extracts the member directly from the local zip file. Idempotent:
-    skips download and extraction if the member is already cached and non-empty.
+    dev it extracts the member directly from the local zip file.
     """
     import tempfile
     import zipfile
@@ -258,16 +252,75 @@ def ensure_parent(target: str) -> None:
         Path(target).parent.mkdir(parents=True, exist_ok=True)
 
 
-def write_parquet(gdf, target: str) -> None:
-    """Write a GeoDataFrame to the curated target in either backend.
+def _gdf_to_wkb_df(gdf, geom_col: str) -> pd.DataFrame:
+    """Convert a GeoDataFrame to a plain DataFrame with WKB geometry."""
+    df = gdf.drop(columns=[geom_col])
+    df[geom_col] = gdf.geometry.to_wkb()
+    return df
 
-    geopandas' ``to_parquet`` hands the path straight to pyarrow, which only
-    accepts a local filesystem path — not an ``s3://`` URI. So on S3 we open the
-    object with s3fs and write through that file handle; in dev we write the
-    local path directly.
+
+def _plan_write(gdf, geom_col: str, target_chunk_mb: int):
+    """From a sample, return (schema to pin across all chunks, rows per chunk).
+
+    Pinning the schema stops per-chunk type inference from diverging mid-write.
+    Sizing is in-memory bytes (what bounds the spike), not on-disk size.
     """
+    sample = _gdf_to_wkb_df(gdf.iloc[: min(1000, len(gdf))], geom_col)
+    schema = pa.Table.from_pandas(sample, preserve_index=False).schema
+    if len(sample) == 0:
+        return schema, 1
+    avg_row_bytes = sample.memory_usage(deep=True).sum() / len(sample)
+    row_group_size = max(1, int(target_chunk_mb * 1024 * 1024 / avg_row_bytes))
+    logger.debug(
+        f"parquet writer: ~{avg_row_bytes / 1024:.1f} KB/row "
+        f"→ {row_group_size:,} rows/chunk"
+    )
+    return schema, row_group_size
+
+
+def _parquet_sink(target: str):
+    """Writable sink for ParquetWriter: a path string locally, or an s3fs file
+    object on S3 (caller closes it after the writer)."""
     if config.IS_CLOUD:
-        with _fs().open(target, "wb") as f:
-            gdf.to_parquet(f, index=False)
-    else:
-        gdf.to_parquet(target, index=False)
+        key = target[5:] if target.startswith("s3://") else target
+        return _fs().open(key, "wb")
+    return target
+
+
+def write_parquet(
+    gdf,
+    target: str,
+    *,
+    target_chunk_mb: int = 256,
+) -> None:
+    """Write a GeoDataFrame to one Parquet file, geometry as WKB, a chunk at a
+    time (bounds the memory spike). Not GeoParquet and carries no CRS — the
+    load re-asserts 4326; read back with pandas + ``shapely.from_wkb``.
+    """
+    geom_col = gdf.geometry.name
+
+    schema, row_group_size = _plan_write(gdf, geom_col, target_chunk_mb)
+
+    def iter_chunks():
+        if len(gdf) == 0:
+            yield _gdf_to_wkb_df(gdf, geom_col)
+            return
+        for start in range(0, len(gdf), row_group_size):
+            chunk = gdf.iloc[start:start + row_group_size]
+            yield _gdf_to_wkb_df(chunk, geom_col)
+
+    sink = _parquet_sink(target)
+    writer = None
+    try:
+        for df in iter_chunks():
+            table = pa.Table.from_pandas(
+                df, schema=schema, preserve_index=False
+            )
+            if writer is None:
+                writer = pq.ParquetWriter(sink, schema, compression="snappy")
+            writer.write_table(table)
+    finally:
+        if writer:
+            writer.close()
+        if config.IS_CLOUD:
+            sink.close()

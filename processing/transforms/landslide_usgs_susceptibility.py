@@ -30,9 +30,10 @@ def _reclass(a: np.ndarray) -> np.ndarray:
     # Source susceptibility index ranges 0-81 (0 = none, dropped). Even
     # quartiles of 1-81; final thresholds pending scoring methodology.
     out = np.zeros(a.shape, dtype=np.uint8)
-    out[(a >= 21) & (a <= 40)] = 1  # moderate
-    out[(a >= 41) & (a <= 60)] = 2  # high
-    out[(a >= 61) & (a <= 81)] = 3  # very high
+    out[(a >= 0) & (a <= 20)] = 1  # low
+    out[(a >= 21) & (a <= 40)] = 2  # moderate
+    out[(a >= 41) & (a <= 60)] = 3  # high
+    out[(a >= 61) & (a <= 81)] = 4  # very high
     return out
 
 

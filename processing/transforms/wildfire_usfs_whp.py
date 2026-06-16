@@ -29,8 +29,8 @@ CLASS_FIELD = "hazard_class"  # 1 very low .. 5 very high
 
 
 def _reclass(a: np.ndarray) -> np.ndarray:
-    # Keep hazard classes 1-5 as-is (already severity-ordered); drop 1/6/7/255.
-    return np.where((a >= 2) & (a <= 5), a, 0).astype(np.uint8)
+    # Keep hazard classes 1-5 as-is (already severity-ordered); drop 6/7/255.
+    return np.where((a >= 1) & (a <= 5), a, 0).astype(np.uint8)
 
 
 def transform(*, source_uri: str, config: dict) -> gpd.GeoDataFrame:
@@ -42,7 +42,7 @@ def transform(*, source_uri: str, config: dict) -> gpd.GeoDataFrame:
         raise FileNotFoundError(f"No {ZIP_GLOB} in {source_uri}")
     zip_name = sorted(zips)[0]
 
-    tif = storage.local_zip_member(raw_root, as_of, zip_name, INNER, force=True)
+    tif = storage.local_zip_member(raw_root, as_of, zip_name, INNER)
     logger.info(f"reading {INNER} from local cache")
 
     return raster.polygonize(
