@@ -79,7 +79,7 @@ sources:
   env_swrcb_geotracker:
     schema: environmental
     table: env_swrcb_geotracker
-    radius_m: 3000
+    radius_m: 300
     attributes: [global_id, business_name, case_type, status, contaminants]
 
   mining_osmre_amlis:
@@ -112,6 +112,7 @@ sources:
     table: tl_roads
     radius_m: 150
     filter: "mtfcc IN ('S1100','S1200')"
+    attributes: [fullname, route_type, mtfcc]
 
   # --- natural_hazard ---
   flood_dwm_dam_breach_inundation:
