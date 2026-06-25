@@ -17,14 +17,6 @@ import duckdb
 
 from .registry import Source
 
-# Load proximity/.env in dev (if python-dotenv is available); harmless otherwise.
-try:
-    from dotenv import load_dotenv
-
-    load_dotenv(Path(__file__).with_name(".env"), override=False)
-except ImportError:
-    pass
-
 # Environment switch: dev -> local disk, prod -> S3.
 ENV = os.getenv("ENV", "dev").lower()
 DEV_BASE = os.getenv("CURATED_DEV_BASE", "D:/curated")
@@ -38,14 +30,14 @@ PROD_PARCEL = os.getenv("PARCEL_PROD", "s3://low-appeal-agents-us-gis-data/parce
 PARCEL_PATH = PROD_PARCEL if ENV == "prod" else DEV_PARCEL
 
 _ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-_YEAR = re.compile(r"^(\d{4})(?:[-_].*)?$")   # year-only or YYYY_YYYY ranges (dev divergence)
+_YEAR = re.compile(r"^(\d{4})(?:[-_].*)?$")
 
 # Memoized latest-vintage resolution, keyed by (schema, table).
 _LATEST_CACHE: dict[tuple[str, str], str] = {}
 
 
 def _cols(source: Source) -> str:
-    return ", ".join(source.columns)   # attributes (feature) or group_by (count)
+    return ", ".join(source.columns)
 
 
 def _partition_key(name: str) -> str | None:
@@ -60,9 +52,6 @@ def _partition_key(name: str) -> str | None:
     return None
 
 
-# Where the Lambda layer drops the bundled .duckdb_extension files (build_layer.sh
-# zips them under python/, which Lambda mounts at /opt/python). Locally this dir
-# won't exist, so we fall back to INSTALL (downloads from extensions.duckdb.org).
 _EXT_DIR = os.getenv("DUCKDB_EXTENSION_DIR", "/opt/python")
 
 
@@ -70,16 +59,19 @@ def _load_extension(con: duckdb.DuckDBPyConnection, name: str) -> None:
     """LOAD a bundled extension by path on Lambda; INSTALL+LOAD in local dev."""
     bundled = Path(_EXT_DIR) / f"{name}.duckdb_extension"
     if bundled.exists():
-        con.execute(f"LOAD '{bundled.as_posix()}';")   # offline: signed file from the layer
+        con.execute(f"LOAD '{bundled.as_posix()}';")
     else:
-        con.execute(f"INSTALL {name}; LOAD {name};")    # local dev: pull from the network
+        con.execute(f"INSTALL {name}; LOAD {name};")
 
 
 def connect() -> duckdb.DuckDBPyConnection:
     con = duckdb.connect()
-    _load_extension(con, "spatial")
-    if IS_S3:
+    if os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+        con.execute("SET home_directory='/tmp';")   # Lambda: $HOME is empty, /tmp is writable
+    _load_extension(con, "spatial")                  # always — ST_Transform/ST_DWithin/etc.
+    if IS_S3:                                         # only when reading from S3 (prod)
         _load_extension(con, "httpfs")
+        _load_extension(con, "aws")                  # provides the credential_chain provider
         con.execute("CREATE SECRET (TYPE s3, PROVIDER credential_chain);")
     return con
 
@@ -90,9 +82,9 @@ def resolve_latest(con, schema: str, table: str) -> str:
     if key in _LATEST_CACHE:
         return _LATEST_CACHE[key]
 
-    pattern = f"{CURATED_BASE}/{schema}/{table}/*/{table}.parquet"   # canonical per-vintage file
+    pattern = f"{CURATED_BASE}/{schema}/{table}/*/{table}.parquet"
     files = [r[0] for r in con.execute("SELECT file FROM glob(?)", [pattern]).fetchall()]
-    candidates = []                            # (sort_key, as_of_dir)
+    candidates = []
     for path in files:
         as_of = path.replace("\\", "/").split("/")[-2]
         sort_key = _partition_key(as_of)
@@ -119,14 +111,3 @@ def source_relation(con, source: Source) -> str:
         f"FROM read_parquet('{path}'){where})"
     )
 
-
-if __name__ == "__main__":
-    from .registry import list_sources
-
-    print(f"ENV={ENV}  base={CURATED_BASE}")
-    con = connect()
-    for s in list_sources():
-        try:
-            print(f"{s.key:28} latest={resolve_latest(con, s.schema, s.table)}")
-        except FileNotFoundError as e:
-            print(f"{s.key:28} {e}")

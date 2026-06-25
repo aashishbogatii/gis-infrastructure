@@ -11,7 +11,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Environment. IS_CLOUD is the yes/no the rest of the code checks.
-ENV = os.getenv("GIS_ENV", "prod").lower()
+ENV = os.getenv("GIS_ENV", "dev").lower()
 IS_CLOUD = ENV in ("prod", "production", "cloud")
 
 # ONLY load dotenv in local dev

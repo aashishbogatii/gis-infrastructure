@@ -47,19 +47,18 @@ def _probe_cte() -> str:
 def _spatial_predicate(source: Source) -> str:
     """The spatial match test, by source type:
       containment -> only the polygon the parcel is in (ST_Intersects)
-      proximity   -> contained OR within radius (ST_Intersects OR ST_DWithin)
+      proximity   -> contained OR within radius (ST_DWithin)
     """
     feat_3310 = _TO_3310.format(g="s.geom")
     within = f"ST_DWithin(probe.g3310, {feat_3310}, {source.radius_m})"
     contains = "ST_Intersects(s.geom, probe.g4326)"
     if source.type == "containment":
         return contains
-    return f"({contains} OR {within})"   # proximity: in it OR near it
+    return within
 
 
 def _from_where(source: Source, src_relation: str) -> str:
     """FROM + bbox prefilter + the type's spatial predicate, shared by modes."""
-    # containment needs no radius margin; proximity/hybrid expand by the radius.
     ddeg = 0.0 if source.type == "containment" else _deg_margin(source.radius_m)
     return f"""FROM {src_relation} s, probe
     WHERE ST_XMax(s.geom) >= probe.pminx - {ddeg}
@@ -74,7 +73,7 @@ def _feature_sql(source: Source, src_relation: str, *,
     feat_3310 = _TO_3310.format(g="s.geom")
     dist = f"ST_Distance(probe.g3310, {feat_3310})"
     qualify = ""
-    if nearest_by:                       # nearest match per group (e.g. per pollutant)
+    if nearest_by:
         qualify = (f"\n    QUALIFY row_number() OVER "
                    f"(PARTITION BY s.{nearest_by} ORDER BY {dist}) = 1")
     limit = "\n    LIMIT 1" if single else ""
@@ -139,18 +138,8 @@ def proximity_sql(source: Source, src_relation: str) -> str:
         return _count_sql(source, src_relation)
     if source.mode == "nearest":
         if source.group_by:
-            # collapse=True -> one row, {group: reading} map; else one row per group
             if source.collapse:
                 return _nearest_collapsed_sql(source, src_relation)
             return _feature_sql(source, src_relation, nearest_by=source.group_by)
         return _feature_sql(source, src_relation, single=True)
     return _feature_sql(source, src_relation)
-
-
-if __name__ == "__main__":
-    from .registry import get_source
-
-    for key in ("flood_fema_nfhl", "crime_ca"):
-        s = get_source(key)
-        print(f"===== {key} (mode={s.mode}) =====")
-        print(proximity_sql(s, "(SELECT <cols>, geom FROM <src>)"))

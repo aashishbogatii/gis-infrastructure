@@ -67,8 +67,3 @@ def get_source(key: str) -> Source:
         if s.key == key:
             return s
     raise KeyError(f"'{key}' not in proximity registry. Known: {[s.key for s in list_sources()]}")
-
-
-if __name__ == "__main__":
-    for s in list_sources():
-        print(f"{s.key:28} {s.schema}.{s.table:26} r={s.radius_m}m  attrs={s.attributes}")

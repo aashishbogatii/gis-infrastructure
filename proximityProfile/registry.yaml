@@ -42,7 +42,6 @@ sources:
     group_by: category_normalized
     radius_m: 1600
 
-  # --- environmental ---
   dmr_allmine:
     schema: environmental
     table: dmr_allmine
@@ -54,7 +53,7 @@ sources:
     table: env_epa_aqi
     mode: nearest
     group_by: parameter_name
-    collapse: true                 # one row: {pollutant: {reading}} map
+    collapse: true
     radius_m: 10000
     filter: "parameter_name IN ('PM2.5 - Local Conditions','PM10 Total 0-10um STP','Ozone','Sulfur dioxide','Nitrogen dioxide (NO2)','Carbon monoxide')"
     attributes: [parameter_name, annual_mean, max_value, exceedances, site_name]
@@ -62,94 +61,93 @@ sources:
   env_epa_brownfields_acres:
     schema: environmental
     table: env_epa_brownfields_acres
-    radius_m: 800                  # ~0.5 mi: localized contamination/blight
+    radius_m: 800
     attributes: [facility_name, registry_id, county]
 
   env_epa_landfill:
     schema: environmental
     table: env_epa_landfill
-    radius_m: 1600                 # ~1 mi: odor, vectors, truck traffic
+    radius_m: 1600
     attributes: [landfill_name, status, area_acres, waste_in_place_tons]
 
   env_epa_superfund_npl:
     schema: environmental
     table: env_epa_superfund_npl
-    radius_m: 1600                 # ~1 mi: documented value impact of NPL sites
+    radius_m: 10000
     attributes: [epa_id, site_name, npl_status_code]
 
   env_swrcb_geotracker:
     schema: environmental
     table: env_swrcb_geotracker
-    radius_m: 800                  # ~0.5 mi: LUST / cleanup sites, localized
+    radius_m: 3000
     attributes: [global_id, business_name, case_type, status, contaminants]
 
   mining_osmre_amlis:
     schema: environmental
     table: mining_osmre_amlis
-    radius_m: 800                  # ~0.5 mi: abandoned mine land hazards
+    radius_m: 800
     attributes: [amlis_key, problem_type, problem_area, reclamation_status]
 
   water_swrcb_gama:
     schema: environmental
     table: water_swrcb_gama
-    radius_m: 800                  # ~0.5 mi: groundwater contamination indicator
+    radius_m: 800
     attributes: [well_id, well_category, chemical_name, result, result_units, sample_date]
 
   # --- infrastructure ---
   hifdl_refineries:
     schema: infrastructure
     table: hifdl_refineries
-    radius_m: 2000                 # ~1.25 mi: major industrial — air, odor, risk
+    radius_m: 2000
     attributes: [site_id, company, site, atmos_dist_mbpd]
 
   tl_rails:
     schema: infrastructure
     table: tl_rails
-    radius_m: 300                  # rail noise/vibration band
+    radius_m: 300
     attributes: [linearid, fullname, mtfcc]
 
   tl_roads:
     schema: infrastructure
     table: tl_roads
-    radius_m: 150                  # highway noise/air band
-    filter: "mtfcc IN ('S1100','S1200')"   # primary + secondary roads only (skip local streets)
-    attributes: [fullname, route_type, mtfcc]
+    radius_m: 150
+    filter: "mtfcc IN ('S1100','S1200')"
 
   # --- natural_hazard ---
   flood_dwm_dam_breach_inundation:
     schema: natural_hazard
     table: flood_dwm_dam_breach_inundation
-    radius_m: 250                  # in inundation zone or just outside
+    radius_m: 250
     attributes: [dam_name, scenario, loading_scenario, hazard_class]
 
   flood_fema_nfhl:
     schema: natural_hazard
     table: flood_fema_nfhl
-    radius_m: 250                  # in SFHA or just outside (in-zone is the strong signal)
+    radius_m: 250
     attributes: [fld_zone, zone_subty, sfha_tf]
 
   flood_noaa_slrv:
     schema: natural_hazard
     table: flood_noaa_slrv
-    radius_m: 250                  # in sea-level-rise zone or just outside
+    radius_m: 250
     attributes: [region, scenario_type, scenario_ft]
 
   landslide_usgs_inventories:
     schema: natural_hazard
     table: landslide_usgs_inventories
-    radius_m: 300                  # in/adjacent to a documented landslide
+    radius_m: 300
     attributes: [usgs_id, ls_type, confidence, fatalities]
 
   landslide_usgs_susceptibility:
     schema: natural_hazard
     table: landslide_usgs_susceptibility
-    type: containment              # full-coverage raster class: value at the parcel
+    radius_m: 200
     attributes: [susceptibility_class]
 
   seismic_cgs_fault_zones:
     schema: natural_hazard
     table: seismic_cgs_fault_zones
-    radius_m: 200                  # Alquist-Priolo zone or immediate margin
+    radius_m: 200
     attributes: [quad_name, zone_revised, global_id]
 
   seismic_cgs_landslide_zones:
@@ -167,58 +165,57 @@ sources:
   seismic_usgs_nshm:
     schema: natural_hazard
     table: seismic_usgs_nshm
-    radius_m: 500                  # proximity to a modeled fault source
+    radius_m: 500
     attributes: [fault_id, fault_name, dip_deg]
 
   seismic_usgs_qffd:
     schema: natural_hazard
     table: seismic_usgs_qffd
-    radius_m: 500                  # proximity to a Quaternary fault trace
+    radius_m: 500
     attributes: [fault_name, fault_id, age, slip_rate, slip_sense]
 
   tornado_spc_tornado_tracks:
     schema: natural_hazard
     table: tornado_spc_tornado_tracks
-    radius_m: 1000                 # historic track proximity (low relevance in CA)
+    radius_m: 1000
     attributes: [event_date, magnitude, injuries, fatalities, loss]
 
   tsunami_cgs_hazard_area:
     schema: natural_hazard
     table: tsunami_cgs_hazard_area
-    radius_m: 250                  # in inundation zone or just outside
+    radius_m: 250
     attributes: [county, in_hazard_area]
 
   wildfire_calfire_fhsz:
     schema: natural_hazard
     table: wildfire_calfire_fhsz
-    radius_m: 500                  # in severity zone or just outside (fire spreads)
+    radius_m: 500
     attributes: [fhsz_code, fhsz_class, jurisdiction]
 
   wildfire_calfire_wui:
     schema: natural_hazard
     table: wildfire_calfire_wui
-    radius_m: 500                  # wildland-urban interface band
+    radius_m: 500
     attributes: [wui_num, haz_num, housing_density, wui_desc, haz_desc]
 
   wildfire_nifc_fil:
     schema: natural_hazard
     table: wildfire_nifc_fil
-    radius_m: 1000                 # ~0.6 mi: recent fire perimeter (insurance/value)
+    radius_m: 1000
     attributes: [incident_name, incident_type, final_acres, fire_cause, discovery_date]
 
   wildfire_usfs_whp:
     schema: natural_hazard
     table: wildfire_usfs_whp
-    type: containment              # full-coverage raster class: value at the parcel
+    type: containment
     attributes: [hazard_class]
 
   wildfire_usgs_mtbs:
     schema: natural_hazard
     table: wildfire_usgs_mtbs
-    radius_m: 1000                 # ~0.6 mi: recent burn scar (sparse, not full-coverage)
+    radius_m: 1000
     attributes: [severity_class]
 
-  # --- socioeconomic (block-group classification -> containment) ---
   hud_lmip:
     schema: socioeconomic
     table: hud_lmip

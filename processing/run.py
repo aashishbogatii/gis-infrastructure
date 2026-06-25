@@ -63,6 +63,9 @@ def run_one(source_key: str, *, as_of_override: str | None = None) -> str:
     logger.info("Normalizing geometry")
     gdf = geom.normalize(gdf)
 
+    # logger.info("Adding bbox columns + Hilbert sort")
+    # gdf = geom.add_bbox_and_sort(gdf)
+
     logger.info("Stamping provenance")
     gdf = metadata.stamp(
         gdf,
