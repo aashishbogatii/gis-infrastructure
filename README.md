@@ -16,13 +16,15 @@ Source agencies (FEMA, EPA, USGS, CAL FIRE, …)
   → Python preprocessing (geopandas: reproject, clean, simplify → Parquet)
   → S3 (raw + curated, partitioned by as_of date)
   → Warehouse (Duckdb + S3 for now)
+  → proximityProfile: APN → spatial joins over every source → risk-profile JSON
   → Adjustment model
 ```
 
 ## Repository layout
 
 ```
-processing/   the config-driven transform runner — see processing/README.md
+processing/        the config-driven transform runner — see processing/README.md
+proximityProfile/  on-demand parcel risk-profile service — see proximityProfile/README.md
 ```
 
 ## Where to go next
@@ -30,3 +32,6 @@ processing/   the config-driven transform runner — see processing/README.md
 - **Run or extend the data pipeline** → [processing/README.md](processing/README.md).
   One engine reads `registry.yaml` and dispatches per-source transforms; adding a
   source is one registry row plus one transform file.
+- **Query a parcel's risk factors** → [proximityProfile/README.md](proximityProfile/README.md).
+  Given an APN, runs a registry-driven spatial query per source against the curated
+  Parquet and returns the parcel's risk-profile JSON.
